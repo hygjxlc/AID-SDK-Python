@@ -10,41 +10,41 @@ import click
 
 # 命令帮助信息表（命令名 -> 描述）
 COMMANDS_HELP = [
-    ('aid-newTaskCreate',
+    ('newTaskCreate',
      '新建仿真任务\n'
      '  参数：--simulateType（仿真类型）、--taskName（任务名称）\n'
-     '  示例：aid-newTaskCreate --simulateType LaWan --taskName myTask001'),
-    ('aid-uploadParamfiles',
+     '  示例：cli_start.bat newTaskCreate --simulateType LaWan --taskName myTask001'),
+    ('uploadParamfiles',
      '上传任务参数文件\n'
      '  参数：--TaskID（任务ID）、--files（文件路径，逗号分隔）\n'
-     '  示例：aid-uploadParamfiles --TaskID T001 --files /tmp/a.stp,/tmp/b.txt'),
-    ('aid-newTaskverify',
+     '  示例：cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files ./data/model.stp,./data/params.csv'),
+    ('newTaskverify',
      '校验任务参数文件完整性\n'
      '  参数：--TaskID（任务ID）\n'
-     '  示例：aid-newTaskverify --TaskID T001'),
-    ('aid-startTask',
+     '  示例：cli_start.bat newTaskverify --TaskID LaWan00000001'),
+    ('startTask',
      '启动仿真任务\n'
      '  参数：--TaskID（任务ID）\n'
-     '  示例：aid-startTask --TaskID T001'),
-    ('aid-queryTaskStatus',
+     '  示例：cli_start.bat startTask --TaskID LaWan00000001'),
+    ('queryTaskStatus',
      '查询任务当前状态\n'
      '  参数：--TaskID（任务ID）\n'
-     '  示例：aid-queryTaskStatus --TaskID T001'),
-    ('aid-stopTask',
+     '  示例：cli_start.bat queryTaskStatus --TaskID LaWan00000001'),
+    ('stopTask',
      '停止正在运行的仿真任务\n'
      '  参数：--TaskID（任务ID）\n'
-     '  示例：aid-stopTask --TaskID T001'),
-    ('aid-deleteTask',
+     '  示例：cli_start.bat stopTask --TaskID LaWan00000001'),
+    ('deleteTask',
      '删除指定仿真任务\n'
      '  参数：--TaskID（任务ID）\n'
-     '  示例：aid-deleteTask --TaskID T001'),
-    ('aid-fetchTaskResult',
+     '  示例：cli_start.bat deleteTask --TaskID LaWan00000001'),
+    ('fetchTaskResult',
      '下载仿真任务结果文件\n'
      '  参数：--TaskID（任务ID）、--output（本地保存路径）\n'
-     '  示例：aid-fetchTaskResult --TaskID T001 --output /tmp/result.zip'),
-    ('aid-help',
+     '  示例：cli_start.bat fetchTaskResult --TaskID LaWan00000001 --output ./result.zip'),
+    ('help',
      '显示所有命令帮助信息\n'
-     '  示例：aid-help'),
+     '  示例：cli_start.bat help'),
 ]
 
 
