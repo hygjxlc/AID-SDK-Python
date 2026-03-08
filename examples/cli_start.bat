@@ -113,18 +113,22 @@ if "%CMD%"=="help" (
         echo   --taskName      任务名称: 自定义字符串
     )
 ) else if "%CMD%"=="uploadParamfiles" (
-    python -m aid_sdk.cli.cmd_upload_paramfiles !ARGS!
+    REM 把 --files 后面空格分隔的多个文件路径合并为逗号分隔的单个值
+    python "%SCRIPT_DIR%_merge_files_args.py" -- !ARGS! > "%TEMP%\upload_args.tmp"
+    set /p UPLOAD_ARGS=<"%TEMP%\upload_args.tmp"
+    python -m aid_sdk.cli.cmd_upload_paramfiles !UPLOAD_ARGS!
     set "EXIT_CODE=!ERRORLEVEL!"
     if !EXIT_CODE! neq 0 (
         echo.
         echo [错误] 命令执行失败，请检查参数是否正确
         echo.
         echo 正确示例:
-        echo   cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files ./data/model.stp,./data/params.csv
+        echo   cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files .\data\model.stp .\data\params.csv
+        echo   cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files .\data\model.stp,.\data\params.csv
         echo.
         echo 参数说明:
         echo   --TaskID  任务ID: 如 LaWan00000001
-        echo   --files   文件路径: 多个文件用逗号分隔
+        echo   --files   文件路径: 多个文件用空格或逗号分隔
     )
 ) else if "%CMD%"=="newTaskverify" (
     python -m aid_sdk.cli.cmd_new_task_verify !ARGS!
