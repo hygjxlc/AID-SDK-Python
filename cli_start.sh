@@ -6,8 +6,14 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# 设置 PYTHONPATH
-export PYTHONPATH="${SCRIPT_DIR}/src"
+# 检测是否已通过 pip 安装 aid-client-sdk（whl 模式）
+if python -c "import aid_sdk" >/dev/null 2>&1; then
+    # whl 已安装，无需设置 PYTHONPATH
+    export PYTHONPATH=""
+else
+    # 未安装，回退到 src/ 目录模式
+    export PYTHONPATH="${SCRIPT_DIR}/src"
+fi
 
 # 显示帮助信息
 show_help() {

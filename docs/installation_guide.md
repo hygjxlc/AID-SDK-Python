@@ -1,14 +1,14 @@
-# AID Client SDK（Python 版）安装与配置手册
+# AID Client SDK（Python 版）用户手册
 
 ## 目录
 
 1. [环境要求](#1-环境要求)
-2. [目录结构](#2-目录结构)
-3. [安装步骤](#3-安装步骤)
+2. [安装包内容](#2-安装包内容)
+3. [快速开始](#3-快速开始)
 4. [配置文件说明](#4-配置文件说明)
-5. [日志配置](#5-日志配置)
-6. [运行示例](#6-运行示例)
-7. [完整调用示例](#7-完整调用示例)
+5. [CLI 命令使用](#5-cli-命令使用)
+6. [完整工作流程](#6-完整工作流程)
+7. [日志说明](#7-日志说明)
 8. [常见问题](#8-常见问题)
 
 ---
@@ -18,7 +18,7 @@
 | 组件 | 版本要求 | 说明 |
 |-----|---------|------|
 | Python | 3.9+ | 运行时环境 |
-| pip | 最新版 | 依赖管理 |
+| pip | 最新版 | 依赖和 SDK 安装工具 |
 | 操作系统 | Windows 10+ / Linux / macOS | 均支持 |
 
 ### 验证环境
@@ -33,64 +33,59 @@ pip --version
 
 ---
 
-## 2. 目录结构
+## 2. 安装包内容
+
+解压 `aid-client-sdk-python-1.0.0.zip` 后目录如下：
 
 ```
 aid-client-sdk-python/
+├── aid_client_sdk-1.0.0-py3-none-any.whl  ← SDK 安装包（pip 安装）
 ├── config/
-│   └── config.yml                # SDK 配置文件（重要）
+│   └── config.yml                          ← 服务器地址和认证配置（必须修改）
+├── cli_start.bat                           ← Windows CLI 启动脚本
+├── cli_start.sh                            ← Linux/macOS CLI 启动脚本
 ├── examples/
-│   └── basic_usage.py            # 使用示例（参考）
-├── src/aid_sdk/                  # SDK 源码包
-│   ├── auth/                     # 认证模块
-│   ├── cli/                      # 命令行工具
-│   ├── common/                   # 公共模块（异常、响应等）
-│   ├── config/                   # 配置加载模块
-│   ├── http/                     # HTTP 客户端
-│   ├── logging/
-│   │   └── aid_logger.py         # 日志配置模块（重要）
-│   ├── task/                     # 任务管理模块
-│   └── client.py                 # AidClient 主入口
-├── tests/                        # 测试用例
-├── logs/                         # 日志目录（运行时自动创建）
-│   └── aid-sdk.log
-├── requirements.txt              # 依赖列表
-├── requirements-dev.txt          # 开发依赖列表
-└── setup.py                      # 安装配置
+│   ├── basic_usage.py                      ← Python 调用示例
+│   └── data/                               ← 示例数据文件
+├── docs/
+│   └── installation_guide.md              ← 本手册
+└── requirements.txt                        ← 依赖列表
 ```
 
 ---
 
-## 3. 安装步骤
+## 3. 快速开始
 
-### 3.1 克隆代码
+### 3.1 安装依赖
 
 ```bash
-git clone <仓库地址>
-cd aid-client-sdk-python
+python -m pip install -r requirements.txt
 ```
 
-### 3.2 安装依赖
+### 3.2 安装 SDK
 
 ```bash
-pip install -r requirements.txt
+python -m pip install aid_client_sdk-1.0.0-py3-none-any.whl
 ```
 
-主要依赖包：
-
-| 包名 | 版本 | 用途 |
-|-----|-----|------|
-| requests | >=2.28.0 | HTTP 请求 |
-| pyyaml | >=6.0 | 配置文件解析（YAML 格式） |
-| click | >=8.0.0 | 命令行工具支持 |
-| python-json-logger | >=2.0.0 | JSON 格式日志输出 |
-
-### 3.3 安装 SDK 本身（可选）
-
-如需在其他项目中以包形式引用：
+验证安装成功：
 
 ```bash
-pip install -e .
+python -c "import aid_sdk; print('SDK 安装成功')"
+```
+
+### 3.3 修改配置文件
+
+编辑 `config/config.yml`，填写服务器地址和认证密钥（详见 [第 4 章](#4-配置文件说明)）。
+
+### 3.4 运行 CLI
+
+```bash
+# Windows（从 SDK 根目录运行，不带参数查看帮助）
+cli_start.bat
+
+# Linux / macOS
+./cli_start.sh
 ```
 
 ---
@@ -101,7 +96,7 @@ pip install -e .
 
 ```yaml
 # AID Client SDK Configuration
-baseURL: "http://127.0.0.1:8080/api/v1"
+baseURL: "http://111.228.12.67:28090/api/v1"
 api_token: "11111111"
 ```
 
@@ -109,162 +104,182 @@ api_token: "11111111"
 
 | 字段 | 说明 | 示例 |
 |-----|------|------|
-| `baseURL` | AID-Service 服务地址，包含协议、IP、端口和路径前缀 | `http://127.0.0.1:8080/api/v1` |
+| `baseURL` | AID-Service 服务地址，包含协议、IP、端口和路径前缀 | `http://111.228.12.67:28090/api/v1` |
 | `api_token` | 认证密钥，须与服务端配置一致 | `11111111` |
 
-### 4.2 常见配置场景
+> **重要**：URL 路径必须以 `/api/v1` 结尾。
 
-**本机调试（默认）：**
-```yaml
-baseURL: "http://127.0.0.1:8080/api/v1"
-api_token: "11111111"
-```
+### 4.2 连接其他服务器
 
-**连接远程服务器：**
 ```yaml
 baseURL: "http://192.168.1.100:8080/api/v1"
-api_token: "your_production_api_key"
-```
-
-> **重要**：URL 路径必须以 `/api/v1` 结尾，不能使用旧版路径 `/aid-service`。
-
-### 4.3 指定配置文件路径
-
-`AidClient` 初始化时可传入自定义配置文件路径：
-
-```python
-from aid_sdk import AidClient
-
-# 默认路径：./config/config.yml
-client = AidClient(config_path="./config/config.yml")
-
-# 自定义路径
-client = AidClient(config_path="/etc/aid/config.yml")
+api_token: "your_api_key"
 ```
 
 ---
 
-## 5. 日志配置
+## 5. CLI 命令使用
 
-日志模块：`src/aid_sdk/logging/aid_logger.py`
+`cli_start.bat`（Windows）/ `cli_start.sh`（Linux/macOS）封装了所有命令，**默认自动使用 `config/config.yml`**，无需每次手动指定。
 
-### 5.1 日志级别修改
-
-找到以下代码行修改日志级别：
-
-```python
-# src/aid_sdk/logging/aid_logger.py
-
-logger.setLevel(logging.DEBUG)   # 修改此处
-```
-
-| 级别常量 | 适用场景 |
-|---------|---------|
-| `logging.DEBUG` | 开发、测试阶段，输出详细调试信息 |
-| `logging.INFO` | 生产环境，记录关键流程（推荐） |
-| `logging.WARNING` | 只记录警告及以上 |
-| `logging.ERROR` | 只记录错误 |
-
-修改后**无需重新安装**，直接重新运行即可生效。
-
-### 5.2 日志文件位置
-
-- 日志目录：`logs/`（相对于脚本运行目录，自动创建）
-- 当前日志：`logs/aid-sdk.log`
-- 历史日志：`logs/aid-sdk.log.YYYY-MM-DD`（按天滚动，保留 30 天）
-
-### 5.3 日志输出方式
-
-同时输出到**控制台**和**文件**，格式均为 JSON：
-
-```json
-{"asctime": "2026-03-05T14:10:48", "levelname": "INFO", "name": "aid_sdk.task.task_service", "message": "创建任务成功", "api": "new_task_create", "taskID": "AID-20260305-001"}
-```
-
-### 5.4 日志滚动策略
-
-| 配置 | 值 |
-|-----|-----|
-| 滚动时间 | 每天午夜（midnight） |
-| 保留天数 | 30 天 |
-| 编码 | UTF-8 |
-
----
-
-## 6. 运行示例
-
-### 6.1 运行完整示例
+### 5.1 查看帮助
 
 ```bash
-cd aid-client-sdk-python
-
-# 运行示例（需先启动 AID-Service 服务端）
-python examples/basic_usage.py
+# 不带参数运行，显示所有命令和示例
+cli_start.bat
 ```
 
-### 6.2 使用 CLI 命令行工具
+### 5.2 各命令说明
+
+#### 1. 创建任务 — `newTaskCreate`
 
 ```bash
-# 查看帮助
-python -m aid_sdk.cli.main help
-
-# 创建任务
-python -m aid_sdk.cli.main new-task-create --type LaWan --name my_task --config ./config/config.yml
-
-# 上传参数文件
-python -m aid_sdk.cli.main upload-paramfiles --task-id <taskId> --files ./data/model.stp ./data/params.csv
-
-# 校验文件
-python -m aid_sdk.cli.main new-task-verify --task-id <taskId>
-
-# 启动任务
-python -m aid_sdk.cli.main start-task --task-id <taskId>
-
-# 查询状态
-python -m aid_sdk.cli.main query-task-status --task-id <taskId>
-
-# 停止任务
-python -m aid_sdk.cli.main stop-task --task-id <taskId>
-
-# 删除任务
-python -m aid_sdk.cli.main delete-task --task-id <taskId>
-
-# 下载结果
-python -m aid_sdk.cli.main fetch-task-result --task-id <taskId> --output ./results/
+cli_start.bat newTaskCreate --simulateType LaWan --taskName myTask001
 ```
 
----
-
-## 7. 完整调用示例
-
-参考 `examples/basic_usage.py`，完整流程如下：
-
-```
-初始化 AidClient（读取 config.yml）
-    ↓
-步骤 1：new_task_create（创建仿真任务）→ 获取 TaskID
-    ↓
-步骤 2：upload_param_files（上传参数文件）
-    ↓
-步骤 3：new_task_verify（校验文件完整性）
-    ↓
-步骤 4：start_task（启动任务）
-    ↓
-步骤 5：query_task_status（轮询状态，每 10 秒一次）
-    ↓ 状态 = COMPLETED
-步骤 6：fetch_task_result（下载仿真结果）
-```
-
-### 关键配置常量（basic_usage.py）
-
-| 常量 | 说明 | 默认值 |
+| 参数 | 说明 | 可选值 |
 |-----|------|-------|
-| `CONFIG_PATH` | 配置文件路径 | `./config.yml` |
-| `SIMULATE_TYPE` | 仿真类型 | `LaWan` |
-| `TASK_NAME` | 任务名称 | `python_demo_task_001` |
-| `PARAM_FILES` | 参数文件路径列表 | `./data/model.stp` 等 |
-| `OUTPUT_DIR` | 结果下载目录 | `./results/` |
-| `POLL_INTERVAL` | 状态轮询间隔（秒） | `10` |
+| `--simulateType` | 仿真类型 | `LaWan` / `CHOnYA` / `ZhuZao` / `ZhaZhi` / `ZHEWan` / `JIYA` |
+| `--taskName` | 任务名称 | 自定义字符串 |
+
+**返回**：任务 ID，如 `LaWan00000001`
+
+---
+
+#### 2. 上传参数文件 — `uploadParamfiles`
+
+```bash
+# 方式一：逗号分隔（推荐）
+cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files ./examples/data/model.stp,./examples/data/params.csv
+
+# 方式二：空格分隔（脚本自动转换）
+cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files ./examples/data/model.stp ./examples/data/params.csv
+```
+
+| 参数 | 说明 |
+|-----|------|
+| `--TaskID` | 任务 ID |
+| `--files` | 文件路径，多个文件用逗号或空格分隔 |
+
+---
+
+#### 3. 校验文件 — `newTaskverify`
+
+```bash
+cli_start.bat newTaskverify --TaskID LaWan00000001
+```
+
+---
+
+#### 4. 启动任务 — `startTask`
+
+```bash
+cli_start.bat startTask --TaskID LaWan00000001
+```
+
+---
+
+#### 5. 查询任务状态 — `queryTaskStatus`
+
+```bash
+cli_start.bat queryTaskStatus --TaskID LaWan00000001
+```
+
+**返回状态值：**
+
+| 状态 | 说明 |
+|-----|------|
+| `pending` | 等待中 |
+| `running` | 仿真进行中 |
+| `completed` | 完成，可下载结果 |
+| `failed` | 失败 |
+| `stopped` | 已停止 |
+
+---
+
+#### 6. 停止任务 — `stopTask`
+
+```bash
+cli_start.bat stopTask --TaskID LaWan00000001
+```
+
+---
+
+#### 7. 删除任务 — `deleteTask`
+
+```bash
+cli_start.bat deleteTask --TaskID LaWan00000001
+```
+
+---
+
+#### 8. 获取任务结果 — `fetchTaskResult`
+
+```bash
+cli_start.bat fetchTaskResult --TaskID LaWan00000001 --output ./result.zip
+```
+
+| 参数 | 说明 |
+|-----|------|
+| `--TaskID` | 任务 ID |
+| `--output` | 结果文件保存路径，如 `./result.zip` |
+
+> **注意**：任务状态为 `completed` 后才能下载结果。
+
+---
+
+#### 9. 指定配置文件 — `--config`
+
+若需使用非默认配置文件：
+
+```bash
+cli_start.bat newTaskCreate --simulateType LaWan --taskName test --config ./my_config.yml
+```
+
+---
+
+## 6. 完整工作流程
+
+典型的仿真任务从创建到获取结果，完整流程如下：
+
+```
+步骤 1  newTaskCreate    → 创建任务，获得 TaskID
+   ↓
+步骤 2  uploadParamfiles → 上传仿真所需的参数文件
+   ↓
+步骤 3  newTaskverify    → 校验文件完整性（服务端验证）
+   ↓
+步骤 4  startTask        → 启动仿真任务
+   ↓
+步骤 5  queryTaskStatus  → 轮询状态，直到 completed
+   ↓
+步骤 6  fetchTaskResult  → 下载仿真结果文件
+```
+
+### 完整示例脚本（Windows）
+
+```bat
+@echo off
+set TASK_ID=
+
+REM 1. 创建任务
+cli_start.bat newTaskCreate --simulateType LaWan --taskName demo_task
+
+REM 2. 上传参数文件（将 LaWan00000001 替换为实际返回的 TaskID）
+cli_start.bat uploadParamfiles --TaskID LaWan00000001 --files ./examples/data/model.stp,./examples/data/params.csv
+
+REM 3. 校验文件
+cli_start.bat newTaskverify --TaskID LaWan00000001
+
+REM 4. 启动任务
+cli_start.bat startTask --TaskID LaWan00000001
+
+REM 5. 查询状态（手动多次执行直到 completed）
+cli_start.bat queryTaskStatus --TaskID LaWan00000001
+
+REM 6. 下载结果
+cli_start.bat fetchTaskResult --TaskID LaWan00000001 --output ./result.zip
+```
 
 ### 支持的仿真类型
 
@@ -277,120 +292,55 @@ python -m aid_sdk.cli.main fetch-task-result --task-id <taskId> --output ./resul
 | `ZHEWan` | 折弯 |
 | `JIYA` | 挤压 |
 
-### 响应对象访问方式
+---
 
-SDK 返回的响应为对象（非字典），使用 `.` 属性访问：
+## 7. 日志说明
 
-```python
-resp = client.new_task_create("LaWan", "my_task")
+SDK 运行时自动在**当前工作目录**下创建 `logs/` 目录：
 
-# 正确：属性访问
-resp.code          # 响应码
-resp.message       # 响应消息
-resp.data.task_id  # 任务 ID
+- 当前日志：`logs/aid-sdk.log`
+- 历史日志：`logs/aid-sdk.log.YYYY-MM-DD`（按天滚动，保留 30 天）
 
-# 错误：字典访问（会报 TypeError）
-resp["code"]       # ❌ 不支持
+日志格式为 JSON，同时输出到控制台和文件：
+
+```json
+{"asctime": "2026-03-05T14:10:48", "levelname": "INFO", "message": "创建任务成功", "taskID": "LaWan00000001"}
 ```
+
+
+
+
+### Q4：`fetchTaskResult` 提示任务未完成
+
+**原因**：任务仍在运行中，尚未达到 `completed` 状态。
+
+**解决**：先用 `queryTaskStatus` 确认状态为 `completed` 再下载。
 
 ---
 
-## 8. 常见问题
+### Q5：上传多个文件只上传了第一个
 
-### Q1：`ModuleNotFoundError: No module named 'aid_sdk'`
+**原因**：多个文件之间使用了错误的分隔方式。
 
-**原因**：SDK 包未安装，或未在正确目录运行。
-
-**解决方案一**：在项目根目录运行：
+**解决**：使用逗号分隔或空格分隔均可：
 ```bash
-cd aid-client-sdk-python
-python examples/basic_usage.py
+# 逗号分隔
+--files ./model.stp,./params.csv
+
+# 空格分隔（cli_start 脚本自动处理）
+--files ./model.stp ./params.csv
 ```
-
-**解决方案二**：以开发模式安装：
-```bash
-pip install -e .
-```
-
----
-
-### Q2：API 返回 401 认证失败
-
-**错误**：`API Key认证失败，无效的密钥`
-
-**原因**：`config.yml` 中的 `api_token` 与服务端不一致。
-
-**解决**：检查并对齐：
-- SDK：`config/config.yml` → `api_token`
-- 服务端：`AID-service/app_config.yaml` → `auth.api_key`
-
----
-
-### Q3：API 返回 404 Not Found
-
-**原因**：`baseURL` 路径配置错误，使用了旧版 `/aid-service` 路径。
-
-**解决**：
-```yaml
-# 正确
-baseURL: "http://127.0.0.1:8080/api/v1"
-
-# 错误（旧版）
-baseURL: "http://127.0.0.1:8080/aid-service"
-```
-
----
-
-### Q4：`TypeError: 'AidResponse' object is not subscriptable`
-
-**原因**：使用了字典方式访问响应对象（`resp["code"]`），SDK 响应为对象类型。
-
-**解决**：改为属性访问：
-```python
-# 错误
-if resp["code"] != 200:
-    task_id = resp["taskID"]
-
-# 正确
-if resp.code != 200:
-    task_id = resp.data.task_id
-```
-
----
-
-### Q5：连接超时 / 服务无法访问
-
-**原因**：AID-Service 未启动，或 `baseURL` 地址有误。
-
-**解决步骤**：
-1. 确认 AID-Service 已启动并监听 8080 端口
-2. 验证服务是否正常：
-   ```bash
-   curl http://127.0.0.1:8080/api/v1/health
-   ```
-3. 检查 `config.yml` 中的 `baseURL` 是否正确
 
 ---
 
 ### Q6：`ImportError: No module named 'pythonjsonlogger'`
-
-**原因**：`python-json-logger` 未安装。
 
 **解决**：
 ```bash
 pip install python-json-logger>=2.0.0
 ```
 
----
-
-### Q7：日志文件没有生成
-
-**原因**：`logs/` 目录会在第一次调用日志时自动创建，若脚本运行路径不固定，日志可能生成在意外位置。
-
-**解决**：日志文件生成在**脚本运行时的当前工作目录**下的 `logs/` 文件夹中。建议固定工作目录运行：
+或重新安装所有依赖：
 ```bash
-cd aid-client-sdk-python
-python examples/basic_usage.py
+pip install -r requirements.txt
 ```
-
-日志将生成于：`aid-client-sdk-python/logs/aid-sdk.log`

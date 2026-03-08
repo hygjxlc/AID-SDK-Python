@@ -5,9 +5,17 @@ REM 使用方法: cli_start.bat <命令> [参数]
 
 setlocal EnableDelayedExpansion
 
-REM 设置 PYTHONPATH
 set "SCRIPT_DIR=%~dp0"
-set "PYTHONPATH=%SCRIPT_DIR%src"
+
+REM 检测是否已通过 pip 安装 aid-client-sdk（whl 模式）
+python -c "import aid_sdk" >nul 2>&1
+if %ERRORLEVEL% equ 0 (
+    REM whl 已安装，无需设置 PYTHONPATH
+    set "PYTHONPATH="
+) else (
+    REM 未安装，回退到 src/ 目录模式
+    set "PYTHONPATH=%SCRIPT_DIR%src"
+)
 
 if "%~1"=="" (
     echo ============================================================
