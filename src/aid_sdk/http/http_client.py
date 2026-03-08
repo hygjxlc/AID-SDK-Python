@@ -210,6 +210,24 @@ class HttpClient:
                     ErrorCode.RESULT_FETCH_FAILED.code,
                     f"下载文件失败，HTTP 状态码：{resp.status_code}",
                 )
+            # 服务端错误响应 HTTP 状态码也是 200，需检查 Content-Type
+            content_type = resp.headers.get('Content-Type', '')
+            if 'application/json' in content_type:
+                try:
+                    data = resp.json()
+                    code = data.get('code', -1)
+                    message = data.get('message', str(data))
+                    raise AidException(
+                        ErrorCode.RESULT_FETCH_FAILED.code,
+                        f"服务端拒绝下载 (code={code}): {message}",
+                    )
+                except AidException:
+                    raise
+                except Exception:
+                    raise AidException(
+                        ErrorCode.RESULT_FETCH_FAILED.code,
+                        f"服务端返回异常 JSON: {resp.text[:200]}",
+                    )
             return resp.content
         except AidException:
             raise

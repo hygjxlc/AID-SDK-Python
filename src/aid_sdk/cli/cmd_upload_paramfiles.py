@@ -14,15 +14,20 @@ from aid_sdk.common.exceptions import AidException
 
 @click.command('uploadParamfiles')
 @click.option('--TaskID', 'task_id', required=True, help='目标任务 ID')
-@click.option('--files', required=True,
-              help='待上传文件路径列表，多个文件用英文逗号分隔')
+@click.option('--files', required=True, multiple=True,
+              help='待上传文件路径，多个文件用空格或英文逗号分隔')
 @click.option('--config', default='./config/config.yml', show_default=True,
               help='配置文件路径')
-def uploadParamfiles(task_id: str, files: str, config: str) -> None:
+def uploadParamfiles(task_id: str, files: tuple, config: str) -> None:
     """上传任务参数文件。"""
     client = get_client(config)
-    # 解析逗号分隔的文件列表，去除首尾空格
-    file_paths = [fp.strip() for fp in files.split(',') if fp.strip()]
+    # 支持空格分隔（multiple=True 每个 --files 值为一项）和逗号分隔（每项内部再拆分）
+    file_paths = []
+    for item in files:
+        for fp in item.split(','):
+            fp = fp.strip()
+            if fp:
+                file_paths.append(fp)
 
     try:
         resp = client.upload_param_files(task_id, file_paths)
