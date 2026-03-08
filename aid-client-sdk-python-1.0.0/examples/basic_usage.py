@@ -28,7 +28,7 @@ from aid_sdk.common.exceptions import AidException as AidApiException
 # ============================================================
 
 # 配置文件路径（包含 baseURL 和 api_token）
-CONFIG_PATH = "../config/config.yml"
+CONFIG_PATH = "./config/config.yml"
 
 # 仿真类型（可选值：LaWan / CHOnYA / ZhuZao / ZhaZhi / ZHEWan / JIYA）
 SIMULATE_TYPE = "LaWan"

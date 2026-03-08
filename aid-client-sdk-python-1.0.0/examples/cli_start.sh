@@ -98,11 +98,6 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-# 如果用户未指定 --config，自动使用根目录的 config.yml
-if ! printf '%s\n' "${ARGS[@]}" | grep -q -- '--config'; then
-    ARGS+=("--config" "../config/config.yml")
-fi
-
 show_error_example() {
     local cmd="$1"
     echo ""
@@ -179,9 +174,7 @@ case "$CMD" in
         fi
         ;;
     uploadParamfiles)
-        # 把 --files 后面空格分隔的多个文件路径合并为逗号分隔的单个值
-        UPLOAD_ARGS=$(python "$SCRIPT_DIR/_merge_files_args.py" -- "${ARGS[@]}")
-        python -m aid_sdk.cli.cmd_upload_paramfiles $UPLOAD_ARGS
+        python -m aid_sdk.cli.cmd_upload_paramfiles "${ARGS[@]}"
         EXIT_CODE=$?
         if [ $EXIT_CODE -ne 0 ]; then
             show_error_example "uploadParamfiles"
