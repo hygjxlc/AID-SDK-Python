@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+requires = ["setuptools>=40.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "aid-client-sdk"
 version = "1.0.0"
 description = "AID Client SDK - 金属加工仿真系统客户端SDK"
-requires-python = ">=3.8"
+requires-python = ">=3.6"
 dependencies = [
-    "requests>=2.28.0",
+    "requests>=2.25.0",
     "pyyaml>=6.0",
     "click>=8.0.0",
     "python-json-logger>=2.0.0",
