@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aid-client-sdk',
-    version='1.0.0',
+    version='1.0.2',
     description='AID Client SDK - 金属加工仿真系统客户端SDK',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),

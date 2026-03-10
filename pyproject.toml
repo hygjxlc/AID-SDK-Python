@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aid-client-sdk"
-version = "1.0.1"
+version = "1.0.2"
 description = "AID Client SDK - 金属加工仿真系统客户端SDK"
 requires-python = ">=3.6"
 dependencies = [
